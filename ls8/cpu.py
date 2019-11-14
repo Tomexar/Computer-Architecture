@@ -11,6 +11,7 @@ class CPU:
         self.reg = [0] * 8
         self.pc = 0
         self.live = True
+        self.SP = 7
 
 
     def read(self, address):
@@ -82,6 +83,14 @@ class CPU:
 
         print()
 
+    def push(self, a):
+        self.reg[self.SP] -= 1
+        self.ram[self.reg[self.SP]] = self.reg[a]
+
+    def pop(self, a):
+        self.reg[a] = self.ram[self.reg[self.SP]]
+        self.reg[self.SP] += 1
+
     def run(self):
         """Run the CPU."""
 
@@ -92,6 +101,8 @@ class CPU:
         PRN = 0b01000111
         HLT = 0b00000001
         MUL = 0b10100010
+        PUSH = 0b01000101
+        POP = 0b01000110
 
         while self.live:
             operand_a = self.read(self.pc + 1)
@@ -112,6 +123,16 @@ class CPU:
             elif self.ram[self.pc] is MUL:
                 self.alu("MUL", operand_a, operand_b)
                 self.pc += 3
+            
+            elif self.ram[self.pc] is PUSH:
+                self.reg[self.SP] -= 1
+                self.ram[self.reg[self.SP]] = self.reg[operand_a]
+                self.pc += 2
+
+            elif self.ram[self.pc] is POP:
+                self.reg[operand_a] = self.ram[self.reg[self.SP]]
+                self.reg[self.SP] += 1
+                self.pc += 2
             
             else:
                 self.live = False
